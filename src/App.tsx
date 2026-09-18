@@ -17,6 +17,7 @@ import { CustomCursor } from "./components/CustomCursor";
 import { Navigation } from "./components/Navigation";
 import { Hero } from "./sections/Hero";
 import { NetworkScene } from "./sections/NetworkScene";
+import { Capabilities } from "./sections/Capabilities";
 import { ProductSection } from "./sections/ProductSection";
 import { FullReveal } from "./sections/FullReveal";
 import { FinalScene } from "./sections/FinalScene";
@@ -54,6 +55,7 @@ export default function App() {
       <main id="main">
         <Hero />
         <NetworkScene />
+        <Capabilities />
 
         {SECTIONS.map((s, idx) => {
           // alternate layout & accent color for visual rhythm
