@@ -1,17 +1,16 @@
 /**
  * ProductSection — editorial "spread" layout.
- * Type-led, oversized headline, alternating left/right asymmetric layout,
- * with chapter numbering and feature callouts as a numbered list.
+ * Every section now uses a unique per-section visualization (no screenshots).
  *
  * Combines: hardcore editorial density + monograph type treatment +
  *           yoga-calm soft fade-up reveal.
  */
 import { ReactNode } from "react";
 import { SectionHeader } from "../components/SectionHeader";
-import { FloatingScreenshot } from "../components/FloatingScreenshot";
 import {
-  EndpointsViz, PortsViz, CloudflareViz, ConfigViz,
-  TrafficViz, AnalyticsViz, FailoverViz, LogsViz, NotificationsViz,
+  DashboardViz, UsersViz, ServersViz, EndpointsViz, IPScannerViz,
+  PortsViz, CloudflareViz, ConfigViz, TrafficViz, AnalyticsViz,
+  FailoverViz, LogsViz, NotificationsViz, SettingsViz,
 } from "../components/viz";
 import type { SectionCopy } from "../data/content";
 import { useReveal } from "../utils";
@@ -28,7 +27,11 @@ interface Props {
 
 function VisualizationFor({ id }: { id: string }) {
   switch (id) {
+    case "dashboard":      return <DashboardViz />;
+    case "users":          return <UsersViz />;
+    case "servers":        return <ServersViz />;
     case "endpoints":      return <EndpointsViz />;
+    case "ip-scanner":     return <IPScannerViz />;
     case "ports":          return <PortsViz />;
     case "cloudflare":     return <CloudflareViz />;
     case "config":         return <ConfigViz />;
@@ -37,6 +40,7 @@ function VisualizationFor({ id }: { id: string }) {
     case "failover":       return <FailoverViz />;
     case "logs":           return <LogsViz />;
     case "notifications":  return <NotificationsViz />;
+    case "settings":       return <SettingsViz />;
     default:               return null;
   }
 }
@@ -47,7 +51,7 @@ export function ProductSection({ data, accent, layout = "right", decor, features
   const isCenter = layout === "center";
   const isFull = layout === "full";
   const reverse = layout === "left";
-  const chapterNum = String(index + 4).padStart(2, "0"); // chapters start at 04
+  const chapterNum = String(index + 4).padStart(2, "0");
 
   return (
     <section
@@ -94,21 +98,11 @@ export function ProductSection({ data, accent, layout = "right", decor, features
           {children}
         </div>
 
-        {/* Media column */}
+        {/* Media column — always a unique visualization */}
         <div className="product-section__media">
-          {data.shot ? (
-            <FloatingScreenshot
-              name={data.shot}
-              alt={`${data.eyebrow} — ${data.caption ?? data.headline.replace(/\n/g, " ")}`}
-              caption={data.caption}
-              accent={accent}
-              index={index}
-            />
-          ) : (
-            <div className={`viz-wrap ${visible ? "is-in" : ""}`}>
-              <VisualizationFor id={data.id} />
-            </div>
-          )}
+          <div className={`viz-wrap ${visible ? "is-in" : ""}`}>
+            <VisualizationFor id={data.id} />
+          </div>
         </div>
       </div>
 
@@ -167,9 +161,6 @@ export function ProductSection({ data, accent, layout = "right", decor, features
           color: var(--accent-1);
           transform: translateX(4px);
         }
-        @keyframes feature-in {
-          to { opacity: 1; transform: translateX(0); }
-        }
         .features-list__num {
           font-family: var(--font-mono);
           font-size: 10px;
@@ -201,7 +192,7 @@ export function ProductSection({ data, accent, layout = "right", decor, features
         }
         @media (prefers-reduced-motion: reduce) {
           .product-section__chapter, .viz-wrap { opacity: 1; transform: none; }
-          .features-list li { animation: none; opacity: 1; transform: none; }
+          .features-list li { transition: none; opacity: 1; transform: none; }
         }
       `}</style>
     </section>

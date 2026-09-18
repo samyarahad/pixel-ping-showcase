@@ -2,6 +2,7 @@
  * Pixel & Ping — content data
  * The showcase content lives here so copy/sections can be tweaked centrally.
  * Note: no fabricated statistics, no fake testimonials, no pricing, no fake data.
+ * All sections use a unique per-section visualization (no product screenshots).
  */
 
 export interface SectionCopy {
@@ -15,11 +16,6 @@ export interface SectionCopy {
   headline: string;
   /** Supporting paragraph */
   support: string;
-  /** Screenshot filename (without extension) — optional because some
-   *  sections rely purely on abstract visualization. */
-  shot?: string;
-  /** Short caption shown next to the screenshot */
-  caption?: string;
   /** Optional short feature callouts shown under the headline */
   features?: string[];
 }
@@ -32,8 +28,6 @@ export const SECTIONS: SectionCopy[] = [
     headline: "See everything\nat a glance.",
     support:
       "A single surface for the moving parts of your network. Statistics, traffic, and activity are framed as quiet objects — not noise.",
-    shot: "dashboard",
-    caption: "Dashboard — overview, statistics, analytics",
     features: [
       "Total, active & online users at a glance",
       "Active servers and Cloudflare accounts",
@@ -48,8 +42,6 @@ export const SECTIONS: SectionCopy[] = [
     headline: "Designed around\nyour users.",
     support:
       "Organize the people and access that matter to your network. A focused interface for creating, filtering, and finding the users you manage.",
-    shot: "users",
-    caption: "Users — search, filter, create",
     features: [
       "Search and filter your user base",
       "Create new VPN users in seconds",
@@ -64,8 +56,6 @@ export const SECTIONS: SectionCopy[] = [
     headline: "Your infrastructure,\nin view.",
     support:
       "Servers register into the system quietly. Each one becomes a node on the map — visible, contextual, and ready to be paired with the rest of the network.",
-    shot: "servers",
-    caption: "Servers — register & manage",
     features: [
       "Register a new server with one action",
       "Pair servers with endpoints and traffic",
@@ -93,8 +83,6 @@ export const SECTIONS: SectionCopy[] = [
     headline: "Find the signal.",
     support:
       "A focused scanner for clean IP pools and endpoint health. Add ranges, evaluate nodes, and keep a tidy record of what is reachable.",
-    shot: "ip-scanner",
-    caption: "IP Scanner — clean IP pool & health",
     features: [
       "Maintain a clean IP pool with labels",
       "Add Cloudflare ranges in one action",
@@ -221,8 +209,6 @@ export const SECTIONS: SectionCopy[] = [
     headline: "Make the\nexperience yours.",
     support:
       "Profile, appearance, language, panel name, and password — the things that make Pixel & Ping feel like your own.",
-    shot: "settings",
-    caption: "Settings — profile, appearance, general",
     features: [
       "Profile with avatar selection",
       "Appearance: Pixel Neon / Dark / Light / Midnight",
