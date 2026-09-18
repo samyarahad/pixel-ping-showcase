@@ -1,6 +1,6 @@
 /**
- * TrafficViz — thousands of particles moving through paths.
- * Canvas-based, performance-friendly, paused for reduced motion.
+ * TrafficViz — editorial particle stream.
+ * High-contrast B/W particles with orange accents.
  */
 import { useEffect, useRef } from "react";
 
@@ -16,7 +16,7 @@ export function TrafficViz() {
     let w = 0, h = 0;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
 
-    const paths: { x1: number; y1: number; x2: number; y2: number }[] = [];
+    const paths: { x1: number; y1: number; x2: number; y2: number; midY: number }[] = [];
     const particles: { pathIdx: number; t: number; speed: number; size: number; hue: number }[] = [];
 
     function resize() {
@@ -25,65 +25,59 @@ export function TrafficViz() {
       canvas!.width = w * dpr; canvas!.height = h * dpr;
       ctx.scale(dpr, dpr);
 
-      // build a few bezier-ish "paths" between random endpoints
       paths.length = 0;
       const N = 5;
       for (let i = 0; i < N; i++) {
+        const y1 = (i + 0.5) * (h / N) + (Math.random() - 0.5) * 20;
         paths.push({
-          x1: 0,
-          y1: (i + 0.5) * (h / N) + (Math.random() - 0.5) * 20,
+          x1: 0, y1,
           x2: w,
           y2: (i + 0.5) * (h / N) + (Math.random() - 0.5) * 20,
+          midY: y1 - 30,
         });
       }
 
-      // spawn particles
       particles.length = 0;
-      const P = reduced ? 60 : 220;
+      const P = reduced ? 60 : 200;
       for (let i = 0; i < P; i++) {
         particles.push({
           pathIdx: i % paths.length,
           t: Math.random(),
           speed: 0.0008 + Math.random() * 0.0018,
           size: 0.6 + Math.random() * 1.4,
-          hue: Math.random() < 0.6 ? 0 : Math.random() < 0.5 ? 1 : 2,
+          hue: Math.random() < 0.2 ? 1 : 0, // mostly white, occasional orange
         });
       }
     }
 
-    const colors = ["#6e8bff", "#c4a6ff", "#8b5cf6"];
+    const colors = ["#f5f1e8", "#ff5b1f"];
 
     function frame() {
       ctx.clearRect(0, 0, w, h);
 
-      // draw path baselines
       ctx.lineWidth = 0.5;
       paths.forEach((p) => {
         ctx.beginPath();
         ctx.moveTo(p.x1, p.y1);
-        // gentle sine-like curve via quadratic
         const mx = (p.x1 + p.x2) / 2;
-        const my = (p.y1 + p.y2) / 2 - 30;
-        ctx.quadraticCurveTo(mx, my, p.x2, p.y2);
-        ctx.strokeStyle = "rgba(110,139,255,0.10)";
+        ctx.quadraticCurveTo(mx, p.midY, p.x2, p.y2);
+        ctx.strokeStyle = "rgba(245,241,232,0.08)";
         ctx.stroke();
       });
 
-      // particles
       particles.forEach((pt) => {
         pt.t += pt.speed;
         if (pt.t > 1) pt.t = 0;
         const p = paths[pt.pathIdx];
         const mx = (p.x1 + p.x2) / 2;
-        const my = (p.y1 + p.y2) / 2 - 30;
         const t = pt.t;
         const x = (1 - t) * (1 - t) * p.x1 + 2 * (1 - t) * t * mx + t * t * p.x2;
-        const y = (1 - t) * (1 - t) * p.y1 + 2 * (1 - t) * t * my + t * t * p.y2;
+        const y = (1 - t) * (1 - t) * p.y1 + 2 * (1 - t) * t * p.midY + t * t * p.y2;
 
         ctx.beginPath();
         ctx.arc(x, y, pt.size, 0, Math.PI * 2);
         ctx.fillStyle = colors[pt.hue];
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.shadowColor = colors[pt.hue];
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -94,7 +88,7 @@ export function TrafficViz() {
 
     resize();
     if (!reduced) raf = requestAnimationFrame(frame);
-    else frame(); // single static frame
+    else frame();
 
     window.addEventListener("resize", resize);
     return () => {
@@ -105,14 +99,20 @@ export function TrafficViz() {
 
   return (
     <div className="viz" data-viz="traffic">
-      <canvas ref={canvasRef} className="traffic__canvas" />
+      <div className="viz__head">
+        <span className="viz__head-num">FIG. 09</span>
+        <span className="viz__head-rule" />
+        <span className="viz__head-label">TRAFFIC / FLOW</span>
+      </div>
+      <div className="viz__body" style={{ padding: 0, minHeight: "auto" }}>
+        <canvas ref={canvasRef} className="traffic__canvas" />
+      </div>
       <div className="viz__caption">Thousands of particles drifting through the network paths</div>
       <style>{`
         .traffic__canvas {
           width: 100%; height: 280px;
           display: block;
-          background: radial-gradient(ellipse at center, rgba(110,139,255,0.08) 0%, transparent 70%);
-          border-radius: 14px;
+          background: #000;
         }
       `}</style>
     </div>

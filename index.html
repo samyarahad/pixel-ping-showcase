@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./logo/pixel-ping-logo-nav.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#05070d" />
+    <meta name="theme-color" content="#050505" />
     <meta name="color-scheme" content="dark" />
 
     <title>Pixel &amp; Ping — A modern network management experience</title>
@@ -32,26 +32,26 @@
     />
     <meta name="twitter:image" content="./screenshots/dashboard.webp" />
 
-    <!-- Preload primary font -->
+    <!-- Preload primary fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
 
     <!-- Inline loader shown before React mounts -->
     <style>
-      html, body { margin: 0; padding: 0; background: #05070d; color: #e7ecff; }
+      html, body { margin: 0; padding: 0; background: #050505; color: #f5f1e8; }
       #app-loader {
         position: fixed; inset: 0;
-        background: radial-gradient(ellipse at center, #0a1226 0%, #05070d 70%);
+        background: radial-gradient(ellipse at center, #0a0a0c 0%, #050505 70%);
         display: flex; align-items: center; justify-content: center;
         z-index: 9999; transition: opacity 0.8s ease;
       }
       #app-loader .dot {
         width: 8px; height: 8px; border-radius: 50%;
-        background: #6e8bff; box-shadow: 0 0 24px #6e8bff;
+        background: #ff5b1f; box-shadow: 0 0 24px #ff5b1f;
         animation: pulse 1.4s ease-in-out infinite;
       }
       @keyframes pulse {
@@ -64,7 +64,7 @@
     <div id="root"></div>
     <div id="app-loader" aria-hidden="true"><div class="dot"></div></div>
     <noscript>
-      <div style="padding:24px;font-family:sans-serif;color:#e7ecff;background:#05070d">
+      <div style="padding:24px;font-family:sans-serif;color:#f5f1e8;background:#050505">
         Pixel & Ping is a cinematic experience that requires JavaScript and WebGL.
         Please enable JavaScript to view the showcase.
       </div>

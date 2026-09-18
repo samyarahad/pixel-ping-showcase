@@ -1,11 +1,6 @@
 /**
  * NetworkField — fixed full-screen R3F particle network.
- * Acts as the persistent atmospheric backdrop for the entire showcase.
- *
- * Design notes:
- *  - Quiet, premium palette (no neon glow everywhere).
- *  - Particle count scales down on mobile and for prefers-reduced-motion.
- *  - Camera drifts subtly with scroll & pointer.
+ * Editorial B/W palette: white + silver particles with orange accents.
  */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef, useEffect } from "react";
@@ -13,22 +8,20 @@ import * as THREE from "three";
 import { isTouchDevice, prefersReducedMotion } from "../utils";
 
 const COLORS = [
-  new THREE.Color("#6e8bff"),
-  new THREE.Color("#8b5cf6"),
-  new THREE.Color("#c4a6ff"),
-  new THREE.Color("#5b76ff"),
+  new THREE.Color("#f5f1e8"),  // paper white
+  new THREE.Color("#c8c8cc"),  // metallic silver
+  new THREE.Color("#ff5b1f"),  // neon orange (rare)
+  new THREE.Color("#9a958a"),  // warm gray
 ];
 
 function Particles({ count }: { count: number }) {
   const pointsRef = useRef<THREE.Points | null>(null);
   const linesRef = useRef<THREE.LineSegments | null>(null);
 
-  // Generate particle field
   const { positions, colors } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      // Spread within a sphere shell for depth
       const r = 6 + Math.random() * 14;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
@@ -36,7 +29,9 @@ function Particles({ count }: { count: number }) {
       positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.55;
       positions[i * 3 + 2] = r * Math.cos(phi);
 
-      const c = COLORS[Math.floor(Math.random() * COLORS.length)];
+      // 80% white/silver, 15% orange, 5% gray
+      const colorPick = Math.random();
+      const c = colorPick < 0.5 ? COLORS[0] : colorPick < 0.85 ? COLORS[1] : colorPick < 0.95 ? COLORS[2] : COLORS[3];
       colors[i * 3 + 0] = c.r;
       colors[i * 3 + 1] = c.g;
       colors[i * 3 + 2] = c.b;
@@ -44,7 +39,6 @@ function Particles({ count }: { count: number }) {
     return { positions, colors };
   }, [count]);
 
-  // Pre-compute line indices: connect nearby particles once on mount
   const lineGeometry = useMemo(() => {
     const maxConnections = Math.min(count * 4, 4000);
     const linePositions = new Float32Array(maxConnections * 6);
@@ -69,14 +63,13 @@ function Particles({ count }: { count: number }) {
           linePositions[n * 6 + 3] = positions[j * 3 + 0];
           linePositions[n * 6 + 4] = positions[j * 3 + 1];
           linePositions[n * 6 + 5] = positions[j * 3 + 2];
-          // Dim color based on distance
           const a = 1 - d2 / maxDistSq;
-          lineColors[n * 6 + 0] = 0.42 * a;
-          lineColors[n * 6 + 1] = 0.52 * a;
-          lineColors[n * 6 + 2] = 0.85 * a;
-          lineColors[n * 6 + 3] = 0.42 * a;
-          lineColors[n * 6 + 4] = 0.52 * a;
-          lineColors[n * 6 + 5] = 0.85 * a;
+          const useOrange = Math.random() < 0.15;
+          const r = useOrange ? 1.0 : 0.96;
+          const g = useOrange ? 0.36 : 0.94;
+          const b = useOrange ? 0.12 : 0.91;
+          lineColors[n * 6 + 0] = r * a; lineColors[n * 6 + 1] = g * a; lineColors[n * 6 + 2] = b * a;
+          lineColors[n * 6 + 3] = r * a; lineColors[n * 6 + 4] = g * a; lineColors[n * 6 + 5] = b * a;
           n++;
         }
       }
@@ -102,24 +95,14 @@ function Particles({ count }: { count: number }) {
     <group>
       <points ref={pointsRef}>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            count={count}
-            array={positions}
-            itemSize={3}
-          />
-          <bufferAttribute
-            attach="attributes-color"
-            count={count}
-            array={colors}
-            itemSize={3}
-          />
+          <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+          <bufferAttribute attach="attributes-color" count={count} array={colors} itemSize={3} />
         </bufferGeometry>
         <pointsMaterial
           size={0.055}
           vertexColors
           transparent
-          opacity={0.85}
+          opacity={0.75}
           sizeAttenuation
           depthWrite={false}
           blending={THREE.AdditiveBlending}
@@ -130,7 +113,7 @@ function Particles({ count }: { count: number }) {
         <lineBasicMaterial
           vertexColors
           transparent
-          opacity={0.5}
+          opacity={0.45}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -154,7 +137,6 @@ function Rig() {
   }, []);
 
   useFrame((state, delta) => {
-    // Camera drift with scroll & subtle pointer parallax
     const targetX = pointer.x * 1.5;
     const targetY = 1.2 + pointer.y * 0.8 - scrollRef.current * 4;
     const targetZ = 16 - scrollRef.current * 4;
@@ -177,15 +159,11 @@ export function NetworkField() {
     <div className="webgl-layer" aria-hidden="true">
       <Canvas
         dpr={[1, touch ? 1.5 : 2]}
-        gl={{
-          antialias: true,
-          alpha: true,
-          powerPreference: "high-performance",
-        }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: [0, 1.2, 16], fov: 55, near: 0.1, far: 60 }}
       >
-        <color attach="background" args={[0x05070d]} />
-        <fog attach="fog" args={[0x05070d, 12, 32]} />
+        <color attach="background" args={[0x050505]} />
+        <fog attach="fog" args={[0x050505, 12, 32]} />
         <ambientLight intensity={0.5} />
         <Particles count={count} />
         {!reduced && <Rig />}

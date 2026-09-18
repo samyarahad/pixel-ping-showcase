@@ -47,6 +47,7 @@ export default function App() {
     <>
       {webglOk === false ? <FallbackBackdrop /> : <NetworkField />}
       <div className="noise" aria-hidden="true" />
+      <div className="scanlines" aria-hidden="true" />
       <div className="vignette" aria-hidden="true" />
       <ScrollProgress />
       <CustomCursor />
@@ -58,22 +59,16 @@ export default function App() {
         <Capabilities />
 
         {SECTIONS.map((s, idx) => {
-          // alternate layout & accent color for visual rhythm
-          const layouts: Array<"right" | "left" | "center"> = ["right", "left", "right", "left", "right", "left"];
-          const accents = [
-            "var(--accent-1)",
-            "#8b5cf6",
-            "#c4a6ff",
-            "#6e8bff",
-            "#8b5cf6",
-            "#c4a6ff",
-          ];
+          // alternate left/right layout for editorial spread rhythm
+          const layout: "right" | "left" = idx % 2 === 0 ? "right" : "left";
           return (
             <ProductSection
               key={s.id}
               data={s}
-              layout={idx === 0 ? "right" : layouts[idx % layouts.length]}
-              accent={accents[idx % accents.length]}
+              layout={layout}
+              accent="var(--accent-1)"
+              index={idx}
+              features={s.features}
             />
           );
         })}

@@ -1,13 +1,13 @@
 /**
- * FallbackBackdrop — CSS-only particle field shown when WebGL is unavailable.
- * Pure SVG noise + radial gradients + animated dots.
+ * FallbackBackdrop — CSS-only backdrop shown when WebGL is unavailable.
+ * Editorial: B/W grid + orange dot pulses + scanlines.
  */
 export function FallbackBackdrop() {
   return (
     <div className="webgl-layer fallback" aria-hidden="true">
       <div className="fallback__grid" />
       <div className="fallback__dots">
-        {Array.from({ length: 60 }).map((_, i) => {
+        {Array.from({ length: 50 }).map((_, i) => {
           const x = (i * 37) % 100;
           const y = (i * 71) % 100;
           const delay = (i % 12) * 0.6;
@@ -27,12 +27,12 @@ export function FallbackBackdrop() {
       </div>
 
       <style>{`
-        .fallback { background: radial-gradient(ellipse at center, #0a1226 0%, #05070d 70%); }
+        .fallback { background: radial-gradient(ellipse at center, #0a0a0c 0%, #050505 70%); }
         .fallback__grid {
           position: absolute; inset: 0;
           background-image:
-            linear-gradient(rgba(110,139,255,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(110,139,255,0.04) 1px, transparent 1px);
+            linear-gradient(rgba(245,241,232,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(245,241,232,0.04) 1px, transparent 1px);
           background-size: 60px 60px;
           mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
           -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
@@ -40,8 +40,8 @@ export function FallbackBackdrop() {
         .fallback__dots span {
           position: absolute; width: 3px; height: 3px;
           border-radius: 50%;
-          background: rgba(170,188,255,0.6);
-          box-shadow: 0 0 8px rgba(110,139,255,0.6);
+          background: rgba(255,91,31,0.7);
+          box-shadow: 0 0 8px rgba(255,91,31,0.6);
           animation: fallback-float linear infinite;
         }
         @keyframes fallback-float {

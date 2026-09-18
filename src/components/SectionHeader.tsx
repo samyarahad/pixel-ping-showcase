@@ -1,12 +1,13 @@
 /**
- * SectionHeader — eyebrow + headline (with mask-reveal) + support paragraph.
- * Animates in via IntersectionObserver.
+ * SectionHeader — editorial headline with mask-reveal + support paragraph.
+ * Headlines support multi-line via \n. The first line gets bold display,
+ * subsequent lines can use serif italic accents via the `accent` style.
  */
 import { ReactNode } from "react";
 import { useReveal } from "../utils";
 
 interface Props {
-  eyebrow: string;
+  eyebrow?: string;
   headline: string;
   support?: string;
   align?: "left" | "center";
@@ -22,13 +23,13 @@ export function SectionHeader({ eyebrow, headline, support, align = "left", chil
       className={`section__head ${visible ? "is-visible" : ""}`}
       style={align === "center" ? { margin: "0 auto", textAlign: "center" } : undefined}
     >
-      <div className={`eyebrow ${visible ? "is-visible" : ""}`}>{eyebrow}</div>
+      {eyebrow && <div className={`eyebrow ${visible ? "is-visible" : ""}`}>{eyebrow}</div>}
 
-      <h2 className="h-display h-2" style={{ margin: "18px 0 22px" }}>
+      <h2 className="h-display h-2" style={{ margin: "0 0 22px" }}>
         {lines.map((line, i) => (
           <span
             key={i}
-            className={`reveal-mask ${visible ? "is-visible" : ""}`}
+            className={`reveal-mask ${visible ? "is-visible" : ""} ${i % 2 === 1 ? "is-accent" : ""}`}
             style={{ display: "block", "--reveal-delay": `${i * 120}ms` } as React.CSSProperties}
           >
             <span>{line}</span>
@@ -38,7 +39,7 @@ export function SectionHeader({ eyebrow, headline, support, align = "left", chil
 
       {support && (
         <p
-          className={`lead reveal ${visible ? "is-visible" : ""}`}
+          className={`lead reveal-soft ${visible ? "is-visible" : ""}`}
           style={{ "--reveal-delay": "240ms" } as React.CSSProperties}
         >
           {support}
@@ -46,6 +47,17 @@ export function SectionHeader({ eyebrow, headline, support, align = "left", chil
       )}
 
       {children}
+
+      <style>{`
+        .section__head h2 .reveal-mask.is-accent > span {
+          font-family: var(--font-serif);
+          font-style: italic;
+          font-weight: 300;
+          color: var(--accent-1);
+          text-transform: none;
+          letter-spacing: -0.02em;
+        }
+      `}</style>
     </div>
   );
 }

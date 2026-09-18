@@ -1,9 +1,10 @@
 /**
- * ProductSection — generic premium section layout.
- * Used for every product capability scene in the showcase.
+ * ProductSection — editorial "spread" layout.
+ * Type-led, oversized headline, alternating left/right asymmetric layout,
+ * with chapter numbering and feature callouts as a numbered list.
  *
- * For sections without a real screenshot, a unique per-section visualization
- * is rendered instead of a generic abstract panel.
+ * Combines: hardcore editorial density + monograph type treatment +
+ *           yoga-calm soft fade-up reveal.
  */
 import { ReactNode } from "react";
 import { SectionHeader } from "../components/SectionHeader";
@@ -20,12 +21,11 @@ interface Props {
   accent?: string;
   layout?: "right" | "left" | "center" | "full";
   decor?: ReactNode;
-  /** optional feature callouts below the headline */
   features?: string[];
+  index?: number;
   children?: ReactNode;
 }
 
-/** Map section id -> visualization component (only for sections without a real screenshot). */
 function VisualizationFor({ id }: { id: string }) {
   switch (id) {
     case "endpoints":      return <EndpointsViz />;
@@ -41,12 +41,13 @@ function VisualizationFor({ id }: { id: string }) {
   }
 }
 
-export function ProductSection({ data, accent, layout = "right", decor, features, children }: Props) {
+export function ProductSection({ data, accent, layout = "right", decor, features, index = 0, children }: Props) {
   const { ref, visible } = useReveal<HTMLElement>({ threshold: 0.1, rootMargin: "0px 0px -10% 0px" });
 
   const isCenter = layout === "center";
   const isFull = layout === "full";
   const reverse = layout === "left";
+  const chapterNum = String(index + 4).padStart(2, "0"); // chapters start at 04
 
   return (
     <section
@@ -62,34 +63,29 @@ export function ProductSection({ data, accent, layout = "right", decor, features
     >
       {decor && <div className="product-section__decor" aria-hidden="true">{decor}</div>}
 
-      <div
-        className="shell"
-        style={{
-          display: "flex",
-          gap: 60,
-          alignItems: "center",
-          flexDirection: reverse ? "row-reverse" : "row",
-          flexWrap: "wrap",
-          justifyContent: isCenter ? "center" : "space-between",
-        }}
-      >
-        <div className="product-section__text" style={{ flex: "1 1 420px", maxWidth: 600 }}>
+      <div className={`shell product-section__inner ${reverse ? "is-reverse" : ""}`}>
+        {/* Text column */}
+        <div className="product-section__text">
+          <div className={`product-section__chapter ${visible ? "is-in" : ""}`}>
+            <span className="num-tag">CH. {chapterNum}</span>
+            <span className="rule-strong" style={{ width: 60, margin: "0 14px" }} />
+            <span className="col-label">{data.eyebrow}</span>
+          </div>
+
           <SectionHeader
-            eyebrow={data.eyebrow}
+            eyebrow=""
             headline={data.headline}
             support={data.support}
             align={isCenter ? "center" : "left"}
           />
 
           {features && features.length > 0 && (
-            <ul
-              className={`features-list reveal ${visible ? "is-visible" : ""}`}
-              style={{ "--reveal-delay": "320ms" } as React.CSSProperties}
-            >
-              {features.map((f) => (
-                <li key={f}>
-                  <span className="features-list__check" aria-hidden="true">◆</span>
-                  <span>{f}</span>
+            <ul className={`features-list ${visible ? "is-in" : ""}`}>
+              {features.map((f, i) => (
+                <li key={f} style={{ animationDelay: `${i * 80}ms` }}>
+                  <span className="features-list__num">0{i + 1}</span>
+                  <span className="features-list__text">{f}</span>
+                  <span className="features-list__arrow" aria-hidden="true">→</span>
                 </li>
               ))}
             </ul>
@@ -98,16 +94,18 @@ export function ProductSection({ data, accent, layout = "right", decor, features
           {children}
         </div>
 
-        <div className="product-section__media" style={{ flex: "1 1 480px", maxWidth: 720, minWidth: 280 }}>
+        {/* Media column */}
+        <div className="product-section__media">
           {data.shot ? (
             <FloatingScreenshot
               name={data.shot}
               alt={`${data.eyebrow} — ${data.caption ?? data.headline.replace(/\n/g, " ")}`}
               caption={data.caption}
               accent={accent}
+              index={index}
             />
           ) : (
-            <div className={`viz-wrap reveal ${visible ? "is-visible" : ""}`} style={{ "--reveal-delay": "180ms" } as React.CSSProperties}>
+            <div className={`viz-wrap ${visible ? "is-in" : ""}`}>
               <VisualizationFor id={data.id} />
             </div>
           )}
@@ -120,43 +118,87 @@ export function ProductSection({ data, accent, layout = "right", decor, features
           pointer-events: none; z-index: -1;
         }
 
+        .product-section__inner {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 64px;
+          align-items: center;
+        }
+        .product-section__inner.is-reverse {
+          grid-template-columns: 1fr 1fr;
+          direction: rtl;
+        }
+        .product-section__inner.is-reverse > * { direction: ltr; }
+
+        .product-section__chapter {
+          display: flex; align-items: center;
+          margin-bottom: 32px;
+          opacity: 0; transform: translateY(-10px);
+          transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+        }
+        .product-section__chapter.is-in { opacity: 1; transform: none; }
+
         .features-list {
-          list-style: none; padding: 0;
-          margin: 28px 0 0;
-          display: grid; gap: 10px;
+          list-style: none; padding: 0; margin: 36px 0 0;
+          display: grid; gap: 0;
+          border-top: 1px solid var(--line);
         }
         .features-list li {
-          display: flex; align-items: center; gap: 12px;
-          font-size: 13px; color: var(--text-2);
-          padding: 10px 14px;
-          background: rgba(12,18,36,0.4);
-          border: 1px solid var(--line);
-          border-radius: 10px;
-          transition: border-color 0.35s, color 0.35s, transform 0.35s;
+          display: grid;
+          grid-template-columns: 32px 1fr 16px;
+          align-items: center; gap: 14px;
+          padding: 16px 0;
+          border-bottom: 1px solid var(--line);
+          font-size: 13px;
+          color: var(--text-2);
+          opacity: 0;
+          transform: translateX(-12px);
+          animation: feature-in 0.7s var(--ease-out) forwards;
+          transition: color 0.3s, padding 0.3s;
         }
         .features-list li:hover {
-          border-color: var(--accent);
           color: var(--text-1);
+          padding-left: 8px;
+        }
+        .features-list li:hover .features-list__arrow {
+          color: var(--accent-1);
           transform: translateX(4px);
         }
-        .features-list__check {
-          font-size: 8px;
-          color: var(--accent);
-          text-shadow: 0 0 8px var(--accent-glow);
+        @keyframes feature-in {
+          to { opacity: 1; transform: translateX(0); }
+        }
+        .features-list__num {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--accent-1);
+          letter-spacing: 0.1em;
+        }
+        .features-list__text { line-height: 1.5; }
+        .features-list__arrow {
+          font-family: var(--font-mono);
+          color: var(--text-3);
+          transition: color 0.3s, transform 0.3s;
         }
 
         .viz-wrap {
           opacity: 0;
-          transform: translateY(30px);
+          transform: translateY(30px) translateX(20px);
           transition: opacity 1.1s var(--ease-out), transform 1.1s var(--ease-out);
+          transition-delay: 0.2s;
         }
-        .viz-wrap.is-visible { opacity: 1; transform: none; }
+        .viz-wrap.is-in { opacity: 1; transform: none; }
 
-        @media (max-width: 880px) {
-          .product-section .shell { flex-direction: column !important; gap: 32px; }
-          .product-section__text, .product-section__media {
-            max-width: 100% !important; flex: 1 1 100% !important;
+        @media (max-width: 980px) {
+          .product-section__inner,
+          .product-section__inner.is-reverse {
+            grid-template-columns: 1fr;
+            direction: ltr;
+            gap: 40px;
           }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .product-section__chapter, .viz-wrap { opacity: 1; transform: none; }
+          .features-list li { animation: none; opacity: 1; transform: none; }
         }
       `}</style>
     </section>
