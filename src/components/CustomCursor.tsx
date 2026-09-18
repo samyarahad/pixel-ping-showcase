@@ -6,7 +6,7 @@
 import { useEffect, useRef } from "react";
 import { isTouchDevice } from "../utils";
 
-const MAX_DOTS = 14;
+const MAX_DOTS = 8;
 
 export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement | null>(null);
@@ -46,9 +46,9 @@ export function CustomCursor() {
       const interactive = !!t?.closest('a, button, [data-cursor="hover"], input, textarea, select');
       trail.classList.toggle("is-hover", interactive);
 
-      // Spawn risograph dots periodically while moving
+      // Spawn risograph dots periodically while moving (throttled)
       const now = performance.now();
-      if (now - lastDotTime > 38) {
+      if (now - lastDotTime > 60) {
         lastDotTime = now;
         const d = dots[dotIdx % MAX_DOTS];
         dotIdx++;

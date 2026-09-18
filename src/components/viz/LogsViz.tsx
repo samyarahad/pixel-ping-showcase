@@ -3,6 +3,7 @@
  * High-contrast mono, color-coded levels, auto-scroll.
  */
 import { useEffect, useRef, useState } from "react";
+import { useInViewport } from "../../hooks/useInViewport";
 
 const SAMPLE = [
   { lvl: "INFO",  msg: "edge-01.pp  handshake established",  c: "#f5f1e8" },
@@ -22,13 +23,14 @@ const SAMPLE = [
 export function LogsViz() {
   const [lines, setLines] = useState<{ id: number; lvl: string; msg: string; c: string; ts: string }[]>([]);
   const idRef = useRef(0);
+  const { ref, inView } = useInViewport<HTMLDivElement>({ threshold: 0.05, rootMargin: "100px" });
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const seed = Array.from({ length: 6 }).map(() => makeLine());
     setLines(seed);
 
-    if (reduced) return;
+    if (reduced || !inView) return;
     const id = setInterval(() => {
       setLines((prev) => [...prev, makeLine()].slice(-9));
     }, 1100);
@@ -41,10 +43,10 @@ export function LogsViz() {
       idRef.current += 1;
       return { id: idRef.current, lvl: s.lvl, msg: s.msg, c: s.c, ts };
     }
-  }, []);
+  }, [inView]);
 
   return (
-    <div className="viz" data-viz="logs">
+    <div className="viz" data-viz="logs" ref={ref}>
       <div className="viz__head">
         <span className="viz__head-num">FIG. 12</span>
         <span className="viz__head-rule" />

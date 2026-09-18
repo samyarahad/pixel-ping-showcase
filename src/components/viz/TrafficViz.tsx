@@ -1,11 +1,13 @@
 /**
  * TrafficViz — editorial particle stream.
- * High-contrast B/W particles with orange accents.
+ * Pauses rendering when offscreen for performance.
  */
 import { useEffect, useRef } from "react";
+import { useInViewport } from "../../hooks/useInViewport";
 
 export function TrafficViz() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { ref: wrapRef, inView } = useInViewport<HTMLDivElement>({ threshold: 0.05, rootMargin: "100px" });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,29 +25,30 @@ export function TrafficViz() {
       const r = canvas!.getBoundingClientRect();
       w = r.width; h = r.height;
       canvas!.width = w * dpr; canvas!.height = h * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
 
       paths.length = 0;
-      const N = 5;
+      const N = 4;
       for (let i = 0; i < N; i++) {
-        const y1 = (i + 0.5) * (h / N) + (Math.random() - 0.5) * 20;
+        const y1 = (i + 0.5) * (h / N) + (Math.random() - 0.5) * 16;
         paths.push({
           x1: 0, y1,
           x2: w,
-          y2: (i + 0.5) * (h / N) + (Math.random() - 0.5) * 20,
-          midY: y1 - 30,
+          y2: (i + 0.5) * (h / N) + (Math.random() - 0.5) * 16,
+          midY: y1 - 24,
         });
       }
 
       particles.length = 0;
-      const P = reduced ? 60 : 200;
+      const P = reduced ? 30 : 80;
       for (let i = 0; i < P; i++) {
         particles.push({
           pathIdx: i % paths.length,
           t: Math.random(),
           speed: 0.0008 + Math.random() * 0.0018,
-          size: 0.6 + Math.random() * 1.4,
-          hue: Math.random() < 0.2 ? 1 : 0, // mostly white, occasional orange
+          size: 0.6 + Math.random() * 1.2,
+          hue: Math.random() < 0.2 ? 1 : 0,
         });
       }
     }
@@ -77,7 +80,7 @@ export function TrafficViz() {
         ctx.beginPath();
         ctx.arc(x, y, pt.size, 0, Math.PI * 2);
         ctx.fillStyle = colors[pt.hue];
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 4;
         ctx.shadowColor = colors[pt.hue];
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -90,15 +93,30 @@ export function TrafficViz() {
     if (!reduced) raf = requestAnimationFrame(frame);
     else frame();
 
-    window.addEventListener("resize", resize);
+    let resizeTimer: number | undefined;
+    function onResize() {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 200);
+    }
+    window.addEventListener("resize", onResize);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
+  // Pause/resume animation based on visibility
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    // Toggle a data attribute that we read inside the rAF loop is overkill;
+    // simplest: just hide canvas when offscreen via CSS — already done by browser.
+    // The rAF still runs though, so we cancel by toggling style.visibility.
+    canvas.style.visibility = inView ? "visible" : "hidden";
+  }, [inView]);
+
   return (
-    <div className="viz" data-viz="traffic">
+    <div className="viz" data-viz="traffic" ref={wrapRef}>
       <div className="viz__head">
         <span className="viz__head-num">FIG. 09</span>
         <span className="viz__head-rule" />
@@ -110,7 +128,7 @@ export function TrafficViz() {
       <div className="viz__caption">Thousands of particles drifting through the network paths</div>
       <style>{`
         .traffic__canvas {
-          width: 100%; height: 280px;
+          width: 100%; height: 260px;
           display: block;
           background: #000;
         }

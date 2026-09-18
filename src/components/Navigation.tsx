@@ -31,13 +31,18 @@ export function Navigation() {
       >
         <div className="shell nav__inner">
           <a href="#hero" className="nav__brand" aria-label="Pixel & Ping — Home">
-            <img
-              src="./logo/pixel-ping-logo-nav.png"
-              alt=""
-              width={28}
-              height={28}
-              className="nav__logo"
-            />
+            <picture>
+              <source srcSet="./logo/pixel-ping-logo-nav.webp" type="image/webp" />
+              <img
+                src="./logo/pixel-ping-logo-nav.png"
+                alt=""
+                width={28}
+                height={28}
+                className="nav__logo"
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
             <span className="nav__brand-text" aria-label="PIXEL & PING">
               {brandChars.map((ch, i) => (
                 <span

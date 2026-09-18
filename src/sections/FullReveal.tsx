@@ -66,8 +66,9 @@ export function FullReveal() {
         >
           <div className="reveal-core__center">
             <picture>
+              <source srcSet="./logo/pixel-ping-logo.avif" type="image/avif" />
               <source srcSet="./logo/pixel-ping-logo.webp" type="image/webp" />
-              <img src="./logo/pixel-ping-logo.png" alt="" width={120} height={120} />
+              <img src="./logo/pixel-ping-logo.png" alt="" width={120} height={120} loading="lazy" decoding="async" />
             </picture>
             <div className="reveal-core__center-text">PIXEL &amp; PING</div>
             <div className="reveal-core__center-tag">CORE</div>

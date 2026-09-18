@@ -3,6 +3,7 @@
  * Type-led, sharp corners, color-coded by type.
  */
 import { useEffect, useRef, useState } from "react";
+import { useInViewport } from "../../hooks/useInViewport";
 
 const NOTES = [
   { icon: "✓", title: "Server online",       body: "edge-01.pp  registered",         c: "#6ee7a0" },
@@ -16,20 +17,21 @@ const NOTES = [
 export function NotificationsViz() {
   const [queue, setQueue] = useState<number[]>([0, 1, 2]);
   const idxRef = useRef(3);
+  const { ref, inView } = useInViewport<HTMLDivElement>({ threshold: 0.05, rootMargin: "100px" });
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    if (reduced || !inView) return;
     const id = setInterval(() => {
       const next = idxRef.current % NOTES.length;
       idxRef.current += 1;
       setQueue((prev) => [...prev.slice(-2), next]);
     }, 1800);
     return () => clearInterval(id);
-  }, []);
+  }, [inView]);
 
   return (
-    <div className="viz" data-viz="notifications">
+    <div className="viz" data-viz="notifications" ref={ref}>
       <div className="viz__head">
         <span className="viz__head-num">FIG. 13</span>
         <span className="viz__head-rule" />

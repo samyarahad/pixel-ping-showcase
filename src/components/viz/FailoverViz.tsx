@@ -3,6 +3,7 @@
  * Primary → Switching → Alternate → Connected cycle.
  */
 import { useEffect, useState } from "react";
+import { useInViewport } from "../../hooks/useInViewport";
 
 type Phase = "primary" | "switching" | "alternate" | "connected";
 
@@ -15,20 +16,21 @@ const PHASES: { id: Phase; label: string; color: string }[] = [
 
 export function FailoverViz() {
   const [idx, setIdx] = useState(0);
+  const { ref, inView } = useInViewport<HTMLDivElement>({ threshold: 0.05, rootMargin: "100px" });
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    if (reduced || !inView) return;
     const id = setInterval(() => setIdx((i) => (i + 1) % PHASES.length), 2200);
     return () => clearInterval(id);
-  }, []);
+  }, [inView]);
 
   const phase = PHASES[idx];
   const showPrimary = phase.id === "primary" || phase.id === "switching";
   const showAlternate = phase.id === "alternate" || phase.id === "connected" || phase.id === "switching";
 
   return (
-    <div className="viz" data-viz="failover">
+    <div className="viz" data-viz="failover" ref={ref}>
       <div className="viz__head">
         <span className="viz__head-num">FIG. 11</span>
         <span className="viz__head-rule" />

@@ -11,8 +11,9 @@ export function Footer() {
         <div className="footer__top">
           <div className="footer__brand-block">
             <picture>
+              <source srcSet="./logo/pixel-ping-logo.avif" type="image/avif" />
               <source srcSet="./logo/pixel-ping-logo.webp" type="image/webp" />
-              <img src="./logo/pixel-ping-logo.png" alt="Pixel & Ping logo" width={56} height={56} />
+              <img src="./logo/pixel-ping-logo.png" alt="Pixel & Ping logo" width={56} height={56} loading="lazy" decoding="async" />
             </picture>
             <div>
               <div className="footer__brand-name">{BRAND.name}</div>

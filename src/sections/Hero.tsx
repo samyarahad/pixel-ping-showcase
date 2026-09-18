@@ -69,6 +69,7 @@ export function Hero() {
         <div className={`hero__brand-block ${phase >= 1 ? "is-in" : ""}`}>
           <div className="hero__logo-wrap" aria-hidden="true">
             <picture>
+              <source srcSet="./logo/pixel-ping-logo.avif" type="image/avif" />
               <source srcSet="./logo/pixel-ping-logo.webp" type="image/webp" />
               <img
                 src="./logo/pixel-ping-logo.png"
@@ -76,6 +77,8 @@ export function Hero() {
                 width={88}
                 height={88}
                 className="hero__logo"
+                loading="eager"
+                decoding="async"
               />
             </picture>
           </div>

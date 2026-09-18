@@ -1,7 +1,11 @@
 /**
- * FloatingScreenshot — editorial "spread" treatment.
- * Sharp corners, type-led chrome, oversized label, monograph framing.
- * Subtle parallax tilt on hover (desktop).
+ * FloatingScreenshot — editorial "spread" treatment with responsive AVIF/WebP/JPG.
+ *
+ * Image optimization:
+ *  - <picture> with AVIF → WebP → JPG fallback chain
+ *  - srcset for 3 widths (800/1600/2400) so mobile gets smaller images
+ *  - loading="lazy" + decoding="async"
+ *  - width/height set to prevent layout shift
  */
 import { useEffect, useRef } from "react";
 import { useReveal } from "../utils";
@@ -27,15 +31,20 @@ export function FloatingScreenshot({ name, alt, caption, accent, index = 0 }: Pr
     if (!el) return;
     const frame: HTMLDivElement = el;
 
+    let raf = 0;
     function onMove(e: MouseEvent) {
-      const r = frame.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const dx = (e.clientX - cx) / r.width;
-      const dy = (e.clientY - cy) / r.height;
-      const rx = Math.max(-4, Math.min(4, -dy * 4));
-      const ry = Math.max(-6, Math.min(6, dx * 6));
-      frame.style.transform = `perspective(1600px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        const r = frame.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = (e.clientX - cx) / r.width;
+        const dy = (e.clientY - cy) / r.height;
+        const rx = Math.max(-3, Math.min(3, -dy * 3));
+        const ry = Math.max(-5, Math.min(5, dx * 5));
+        frame.style.transform = `perspective(1600px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        raf = 0;
+      });
     }
     function onLeave() {
       frame.style.transform = "perspective(1600px) rotateX(0deg) rotateY(0deg)";
@@ -47,6 +56,7 @@ export function FloatingScreenshot({ name, alt, caption, accent, index = 0 }: Pr
     return () => {
       parent.removeEventListener("mousemove", onMove);
       parent.removeEventListener("mouseleave", onLeave);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
@@ -65,9 +75,21 @@ export function FloatingScreenshot({ name, alt, caption, accent, index = 0 }: Pr
 
       <div className="floating-shot__frame" ref={frameRef}>
         <picture>
-          <source srcSet={`./screenshots/${name}.webp`} type="image/webp" />
+          {/* AVIF — best compression (modern browsers) */}
+          <source
+            type="image/avif"
+            srcSet={`./screenshots/${name}-800.avif 800w, ./screenshots/${name}-1600.avif 1600w, ./screenshots/${name}-2400.avif 2400w`}
+            sizes="(max-width: 880px) 100vw, 50vw"
+          />
+          {/* WebP — fallback */}
+          <source
+            type="image/webp"
+            srcSet={`./screenshots/${name}-800.webp 800w, ./screenshots/${name}-1600.webp 1600w, ./screenshots/${name}-2400.webp 2400w`}
+            sizes="(max-width: 880px) 100vw, 50vw"
+          />
+          {/* JPG — last resort */}
           <img
-            src={`./screenshots/${name}.jpg`}
+            src={`./screenshots/${name}-1600.jpg`}
             alt={alt}
             loading="lazy"
             decoding="async"
@@ -122,8 +144,7 @@ export function FloatingScreenshot({ name, alt, caption, accent, index = 0 }: Pr
           border: 1px solid var(--line-strong);
           box-shadow:
             0 60px 100px -40px rgba(0,0,0,0.8),
-            0 0 0 1px rgba(255,255,255,0.02) inset,
-            0 0 80px -20px var(--accent-glow);
+            0 0 0 1px rgba(255,255,255,0.02) inset;
           transform: perspective(1600px) rotateX(0deg) rotateY(0deg);
           transition: transform 0.4s var(--ease-out);
           transform-style: preserve-3d;

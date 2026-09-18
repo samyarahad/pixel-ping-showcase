@@ -22,8 +22,9 @@ export function FinalScene() {
         <div className="final__brand-block">
           <div className={`final__logo ${visible ? "is-in" : ""}`}>
             <picture>
+              <source srcSet="./logo/pixel-ping-logo.avif" type="image/avif" />
               <source srcSet="./logo/pixel-ping-logo.webp" type="image/webp" />
-              <img src="./logo/pixel-ping-logo.png" alt="" width={80} height={80} />
+              <img src="./logo/pixel-ping-logo.png" alt="" width={80} height={80} loading="lazy" decoding="async" />
             </picture>
           </div>
           <div className={`final__brand-text ${visible ? "is-in" : ""}`}>PIXEL &amp; PING</div>
