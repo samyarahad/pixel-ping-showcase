@@ -82,7 +82,7 @@ export function ProductSection({ data, accent, layout = "right", decor, features
           {features && features.length > 0 && (
             <ul className={`features-list ${visible ? "is-in" : ""}`}>
               {features.map((f, i) => (
-                <li key={f} style={{ animationDelay: `${i * 80}ms` }}>
+                <li key={f} style={{ transitionDelay: `${i * 80}ms` }}>
                   <span className="features-list__num">0{i + 1}</span>
                   <span className="features-list__text">{f}</span>
                   <span className="features-list__arrow" aria-hidden="true">→</span>
@@ -153,8 +153,11 @@ export function ProductSection({ data, accent, layout = "right", decor, features
           color: var(--text-2);
           opacity: 0;
           transform: translateX(-12px);
-          animation: feature-in 0.7s var(--ease-out) forwards;
-          transition: color 0.3s, padding 0.3s;
+          transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), color 0.3s, padding 0.3s;
+        }
+        .features-list.is-in li {
+          opacity: 1;
+          transform: translateX(0);
         }
         .features-list li:hover {
           color: var(--text-1);
